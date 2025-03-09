@@ -1,0 +1,3 @@
+"""
+Anime Character Sorter package
+""" 
