@@ -116,6 +116,9 @@ class RecognitionWidget(QWidget):
             self.char_tree.setColumnCount(1)
             self.char_tree.setFont(QFont("Microsoft YaHei UI", 10))
             
+            # 初始化 first_char_item
+            first_char_item = None
+            
             # 添加历史记录分组
             if len(self.history_manager.get_character_suggestions()) > 1:  # 如果有历史记录（不只是unknown）
                 history_group = QTreeWidgetItem(["历史记录"])
@@ -124,11 +127,15 @@ class RecognitionWidget(QWidget):
                     if char != "unknown":  # 不在历史记录中显示unknown
                         item = QTreeWidgetItem([char])
                         history_group.addChild(item)
+                        if first_char_item is None:
+                            first_char_item = item
                 history_group.setExpanded(True)
             
             # 添加Unknown选项
             unknown_char = QTreeWidgetItem(["unknown"])
             self.char_tree.addTopLevelItem(unknown_char)
+            if first_char_item is None:
+                first_char_item = unknown_char
             
             # 添加分隔线
             separator_char = QTreeWidgetItem(["-" * 30])
@@ -141,12 +148,11 @@ class RecognitionWidget(QWidget):
                 self.char_tree.addTopLevelItem(results_group)
                 # 添加角色列表
                 added_chars = set()
-                first_char_item = None
-                for character, _ in self.character_info:
-                    if character not in added_chars:
-                        item = QTreeWidgetItem([character])
+                for char, _ in self.character_info:
+                    if char not in added_chars:
+                        item = QTreeWidgetItem([char])
                         results_group.addChild(item)
-                        added_chars.add(character)
+                        added_chars.add(char)
                         if first_char_item is None:
                             first_char_item = item
                 results_group.setExpanded(True)
@@ -198,6 +204,9 @@ class RecognitionWidget(QWidget):
             self.work_tree.setColumnCount(1)
             self.work_tree.setFont(QFont("Microsoft YaHei UI", 10))
             
+            # 初始化 first_work_item
+            first_work_item = None
+            
             # 添加历史记录分组
             if len(self.history_manager.get_work_suggestions()) > 1:  # 如果有历史记录（不只是unknown）
                 history_group = QTreeWidgetItem(["历史记录"])
@@ -206,11 +215,15 @@ class RecognitionWidget(QWidget):
                     if work != "unknown":  # 不在历史记录中显示unknown
                         item = QTreeWidgetItem([work])
                         history_group.addChild(item)
+                        if first_work_item is None:
+                            first_work_item = item
                 history_group.setExpanded(True)
             
             # 添加Unknown选项
             unknown_work = QTreeWidgetItem(["unknown"])
             self.work_tree.addTopLevelItem(unknown_work)
+            if first_work_item is None:
+                first_work_item = unknown_work
             
             # 添加分隔线
             separator_work = QTreeWidgetItem(["-" * 30])
@@ -223,7 +236,6 @@ class RecognitionWidget(QWidget):
                 self.work_tree.addTopLevelItem(results_group)
                 # 添加作品列表
                 added_works = set()
-                first_work_item = None
                 for _, work in self.character_info:
                     if work not in added_works:
                         item = QTreeWidgetItem([work])
