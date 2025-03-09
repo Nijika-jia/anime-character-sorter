@@ -2,6 +2,29 @@
 
 > 一个基于 AnimeTrace API 的动漫角色图片分类工具，支持自动识别动漫角色和作品，并按角色/作品名称分类整理图片。 ✨
 
+## 📥 下载
+
+你可以通过以下方式获取本工具：
+
+### 💾 直接下载
+- [最新版本 v1.0.0](https://github.com/Nijika-jia/anime-character-sorter/releases/latest)
+- [历史版本](https://github.com/Nijika-jia/anime-character-sorter/releases)
+
+### 🔧 从源码构建
+如果你想自己构建程序：
+1. 克隆仓库：
+   ```bash
+   git clone https://github.com/你的用户名/anime-character-sorter.git
+   ```
+2. 安装依赖：
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. 运行构建脚本：
+   ```bash
+   pyinstaller --noconsole --icon=assets/icon.ico src/main.py
+   ```
+
 ## 📖 前言
 
 作为一个动漫爱好者，你是否遇到过这些烦恼？(；一_一)
