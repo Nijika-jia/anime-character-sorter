@@ -14,7 +14,7 @@
 如果你想自己构建程序：
 1. 克隆仓库：
    ```bash
-   git clone https://github.com/你的用户名/anime-character-sorter.git
+   git clone https://github.com/Nijika-jia/anime-character-sorter.git
    ```
 2. 安装依赖：
    ```bash
