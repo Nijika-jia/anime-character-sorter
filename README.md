@@ -1,211 +1,101 @@
 # 动漫图片分类助手：一个基于 AI 的动漫角色识别与整理工具
-
-> 一个基于 AnimeTrace API 的动漫角色图片分类工具，支持自动识别动漫角色和作品，并按角色/作品名称分类整理图片。
+> 基于 AnimeTrace API 的动漫角色图片分类工具，可自动识别角色与作品并按规则整理。
 
 [![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
-[![PyQt6](https://img.shields.io/badge/PyQt6-41CD52?style=flat-square&logo=qt&logoColor=white)](https://www.riverbankcomputing.com/software/pyqt/)
+[![PyQt6](https://img.shields.io/badge/PyQt6-41CD52?style=flat-square&logo=qt6&logoColor=white)](https://www.riverbankcomputing.com/software/pyqt/)
 [![PyInstaller](https://img.shields.io/badge/PyInstaller-000000?style=flat-square&logo=python&logoColor=white)](https://pyinstaller.org/)
-[![Requests](https://img.shields.io/badge/Requests-FF69B4?style=flat-square&logo=python&logoColor=white)](https://requests.readthedocs.io/)
+[![Requests](https://img.shields.io/badge/Requests-FF69B4?style=flat-square&logo=requests&logoColor=white)](https://requests.readthedocs.io/)
+
+---
 
 ## 下载
-
 ### 直接下载
 - [最新版本 v1.0.0](https://github.com/Nijika-jia/anime-character-sorter/releases/latest)
 - [历史版本](https://github.com/Nijika-jia/anime-character-sorter/releases)
 
-### 从源码构建
-如果你想自己构建程序：
-1. 克隆仓库：
-   ```bash
-   git clone https://github.com/Nijika-jia/anime-character-sorter.git
-   ```
-2. 安装依赖：
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. 运行构建脚本：
-   ```bash
-   pyinstaller --noconsole --icon=assets/icon.ico src/main.py
-   ```
+### 源码构建
+```bash
+git clone https://github.com/Nijika-jia/anime-character-sorter.git
+pip install -r requirements.txt
+pyinstaller --noconsole --icon=assets/icon.ico src/main.py
+```
 
-## 前言
+---
 
-作为一个动漫爱好者，你是否遇到过这些问题？
-- 下载的图片堆积如山，难以整理
-- 不记得图片里的角色叫什么名字
-- 想按作品分类，但是忘记了出处
-- 手动整理太费时费力
-- 想要找特定角色的图片要翻很久
+## 简介
+解决动漫图片堆积、角色/作品遗忘、手动整理低效等问题，支持批量识别与分类整理，适合画师、收藏爱好者等使用。
 
-为了解决这些问题，我开发了这个工具。它能够：
-- 自动识别图片中的动漫角色和作品
-- 智能分类和整理图片
-- 保存整理记录，方便下次使用
-- 批量处理，节省时间
-- 支持多种识别模型，提高准确率
+核心能力：
+- 自动识别动漫角色与作品
+- 按角色/作品双维度分类
+- 智能记忆用户修正结果
+- 批量处理与结果打包
 
-无论你是：
-- 同人画师需要整理素材
-- 漫画爱好者想要分类收藏
-- Galgame 玩家需要整理 CG
-- 或者只是想要整理自己的图片收藏
-
-这个工具都能帮你轻松搞定！
+---
 
 ## 功能特点
+- **多模型支持**：动画/ Galgame 多精度识别模型可选
+- **分类模式**：按角色/作品分类，支持同时启用
+- **识别模式**：自动批量处理 / 手动确认修正
+- **智能记忆**：保存历史记录，支持输入补全
+- **便捷操作**：文件夹拖放、图片跳过、重新识别、结果打包
 
-### 多模型支持
-- 低精度动画模型（适用于动画原画）
-- 高精度动画模型①（适用于同人、原画等）
-- 高精度动画模型②（适用于各种场景）
-- 高精度Gal模型①
-
-### 分类模式
-- 按角色分类：将图片按角色名称分类到不同文件夹
-- 按作品分类：将图片按作品名称分类到不同文件夹
-- 支持同时使用两种分类模式
-
-### 识别模式
-- 自动识别：批量处理图片，自动使用 API 识别结果
-- 手动确认：逐张确认识别结果，支持手动修改
-
-### 智能记忆
-- 保存用户输入的角色和作品名称
-- 提供历史记录快速选择
-- 支持输入自动完成功能
-
-### 便捷操作
-- 支持拖放文件夹
-- 支持跳过不需要的图片
-- 支持重新识别功能
-- 结果打包为 ZIP 文件
+---
 
 ## 技术栈
+- **语言**：Python 3.10+
+- **GUI**：PyQt6
+- **打包**：PyInstaller
+- **API**：[AnimeTrace](https://www.animetrace.com/)
+- **依赖**：requests、pathlib、json、shutil
 
-- **前端框架**: PyQt6
-- **编程语言**: Python 3.10+
-- **打包工具**: PyInstaller
-- **API 来源**: [AnimeTrace](https://www.animetrace.com/)
-- **其他依赖**:
-  - requests: HTTP 请求库
-  - pathlib: 路径处理
-  - json: JSON 数据处理
-  - shutil: 文件操作
+---
 
 ## 使用说明
-
-### 基本操作
-1. 启动程序
-2. 点击"选择图片文件夹"按钮选择要处理的图片文件夹
-3. 选择识别模型（建议先使用默认模型）
-4. 选择分类模式（角色/作品/两者都选）
-5. 选择是否自动分类
-6. 点击"开始分类"按钮
+### 基本流程
+1. 启动程序 → 选择图片文件夹
+2. 选择识别模型与分类模式
+3. 选择自动/手动模式 → 开始分类
 
 ### 手动确认模式
-1. 查看识别结果
-2. 可以：
-   - 直接确认识别结果
-   - 从历史记录中选择
-   - 手动输入新的名称
-   - 选择"unknown"（未知）
-   - 点击"跳过"按钮跳过当前图片
-3. 如果识别结果不理想，可以：
-   - 切换其他识别模型
-   - 点击"重新识别"按钮
+- 查看识别结果，可确认、从历史选择、手动输入或跳过
+- 支持切换模型重新识别
 
 ### 自动分类模式
-1. 程序会自动处理所有图片
-2. 使用 API 返回的第一个匹配结果
-3. 完成后自动保存并打包
+- 批量处理所有图片，使用 API 首选结果
+- 完成后自动保存并打包为 ZIP
 
-### 结果保存
-- 程序会创建以下目录结构：
-  ```
-  输出目录/
-  ├── by_character/    # 按角色分类的结果
-  │   ├── 角色1/
-  │   ├── 角色2/
-  │   └── unknown/     # 未识别的图片
-  └── by_work/         # 按作品分类的结果
-      ├── 作品1/
-      ├── 作品2/
-      └── unknown/     # 未识别的图片
-  ```
-- 最后打包为 ZIP 文件，可以选择保存位置
+### 输出结构
+```
+输出目录/
+├── by_character/  # 按角色分类
+└── by_work/       # 按作品分类
+```
+
+---
 
 ## 注意事项
+- 图片格式：JPG/PNG，单张≤4MB，分辨率≥256×256
+- API 限制：服务器繁忙时需重试，可能存在次数限制
+- 数据存储：历史记录保存在 `data` 目录，程序自动清理临时文件
 
-1. 图片要求：
-   - 支持的格式：JPG、JPEG、PNG
-   - 大小限制：单张图片不超过 4MB
-   - 建议分辨率：不小于 256x256
-
-2. API 限制：
-   - 服务器繁忙时可能需要重试
-   - 可能存在使用次数限制
-   - 可能存在维护时段
-
-3. 其他说明：
-   - 历史记录保存在程序目录下的 data 文件夹中
-   - 程序会自动清理临时文件
-   - 建议处理同类型的图片时使用相同的识别模型
+---
 
 ## 常见问题
+1. **无法识别**：切换模型、检查图片清晰度与大小
+2. **结果不准**：使用高精度模型或手动修正
+3. **程序无响应**：检查网络与服务器状态，重启程序
 
-1. **图片无法识别？**
-   - 尝试切换其他识别模型
-   - 检查图片是否清晰可见
-   - 确认图片大小在限制范围内
-
-2. **识别结果不准确？**
-   - 尝试使用更高精度的模型
-   - 使用手动确认模式进行修正
-   - 可以输入正确的名称并保存
-
-3. **程序无响应？**
-   - 可能是服务器繁忙，稍后重试
-   - 检查网络连接是否正常
-   - 重启程序再次尝试
+---
 
 ## 更新历史
-
 ### v1.0.0
-- 基础识别和分类功能
-- 多模型支持
-- 手动/自动分类模式
-- 添加历史记录功能
-- 添加输入自动完成
-- 优化界面布局
-- 添加跳过功能
+- 基础识别与分类功能
+- 多模型与双分类模式
+- 历史记录与输入补全
+- 界面优化与跳过功能
 
-## 技术支持
+---
 
-如果遇到问题或有建议，请提交 Issue
-
-## API 来源
-
-本项目使用了 [AnimeTrace](https://www.animetrace.com/) 提供的 API 服务。
-
-AnimeTrace 是一个专业的动画人物识别平台，提供了多种识别模型：
-- 动画识别模型
-- GalGame 识别模型
-- 漫画识别模型（开发中）
-
-## 特别致谢
-
-特别感谢 [AnimeTrace](https://www.animetrace.com/) 团队提供的优秀 API 服务！
-
-### 为什么选择 AnimeTrace？
-- 准确的识别能力
-- 稳定的服务性能
-- 多样的识别模型
-- 持续的更新维护
-- 活跃的社区支持
-
-AnimeTrace 为广大动漫爱好者提供了优质的图片识别服务，让本项目得以实现。如果您觉得这个服务对您有帮助，欢迎：
-- 访问 [AnimeTrace 官网](https://www.animetrace.com/)
-- 加入 QQ 交流群
-- 向他们提供反馈和建议
-
-> 技术改变生活，创新驱动未来。感谢每一个为开源社区贡献力量的开发者！
+## 致谢
+本项目基于 [AnimeTrace](https://www.animetrace.com/) API 实现，感谢其提供的精准识别服务。
