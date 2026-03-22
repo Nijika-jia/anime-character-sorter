@@ -2,12 +2,10 @@
 
 > 一个基于 AnimeTrace API 的动漫角色图片分类工具，支持自动识别动漫角色和作品，并按角色/作品名称分类整理图片。
 
-<p align="left">
-  [![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
-  [![PyQt6](https://img.shields.io/badge/PyQt6-41CD52?style=flat-square&logo=qt&logoColor=white)](https://www.riverbankcomputing.com/software/pyqt/)
-  [![PyInstaller](https://img.shields.io/badge/PyInstaller-000000?style=flat-square&logo=python&logoColor=white)](https://pyinstaller.org/)
-  [![Requests](https://img.shields.io/badge/Requests-FF69B4?style=flat-square&logo=python&logoColor=white)](https://requests.readthedocs.io/)
-</p>
+[![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![PyQt6](https://img.shields.io/badge/PyQt6-41CD52?style=flat-square&logo=qt&logoColor=white)](https://www.riverbankcomputing.com/software/pyqt/)
+[![PyInstaller](https://img.shields.io/badge/PyInstaller-000000?style=flat-square&logo=python&logoColor=white)](https://pyinstaller.org/)
+[![Requests](https://img.shields.io/badge/Requests-FF69B4?style=flat-square&logo=python&logoColor=white)](https://requests.readthedocs.io/)
 
 ## 下载
 
