@@ -4,7 +4,7 @@
         xmlns:local="clr-namespace:AnimeSorterWin"
         xmlns:conv="clr-namespace:AnimeSorterWin.Converters"
         xmlns:vm="clr-namespace:AnimeSorterWin.ViewModels"
-        Title="确认窗口" Height="820" Width="1080" WindowStartupLocation="CenterOwner">
+        Title="确认窗口" Height="1000" Width="1300" WindowStartupLocation="CenterOwner">
     <Window.Resources>
         <local:CandidateFilterModeToBoolConverter x:Key="CandidateFilterModeToBoolConverter"/>
         <conv:FilePathToFileNameConverter x:Key="FilePathToFileNameConverter"/>

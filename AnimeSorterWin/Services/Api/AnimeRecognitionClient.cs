@@ -80,6 +80,8 @@ public sealed class AnimeRecognitionClient
                     if (attempt >= _settings.MaxRetriesOn429)
                         return (ToUnknownCandidates(), throttled429Count);
 
+                    // 把“退避等待”也作为全局暂停暴露给 UI（便于看到剩余时间）
+                    _executor.TriggerGlobalPause(backoffDelay);
                     await Task.Delay(backoffDelay, ct).ConfigureAwait(false);
                     backoffDelay = TimeSpan.FromTicks(Math.Min(backoffDelay.Ticks * 2, _settings.BackoffMaxDelay.Ticks));
                     continue;
@@ -96,7 +98,12 @@ public sealed class AnimeRecognitionClient
                         return (ToUnknownCandidates(), throttled429Count);
 
                     if (IsThrottleLikeCode(apiResponse.Code))
+                    {
+                        // 17728/17731 这类“像限流一样”的返回码也会导致长时间等待，
+                        // 如果不计入统计，UI 看起来会像“卡住”。
+                        throttled429Count++;
                         _executor.TriggerGlobalPause(backoffDelay);
+                    }
 
                     await Task.Delay(backoffDelay, ct).ConfigureAwait(false);
                     backoffDelay = TimeSpan.FromTicks(Math.Min(backoffDelay.Ticks * 2, _settings.BackoffMaxDelay.Ticks));
@@ -110,6 +117,8 @@ public sealed class AnimeRecognitionClient
             }
             catch when (attempt < _settings.MaxRetriesOn429)
             {
+                // 网络异常/解析异常：同样做退避，并把剩余时间暴露给 UI
+                _executor.TriggerGlobalPause(backoffDelay);
                 await Task.Delay(backoffDelay, ct).ConfigureAwait(false);
                 backoffDelay = TimeSpan.FromTicks(Math.Min(backoffDelay.Ticks * 2, _settings.BackoffMaxDelay.Ticks));
             }

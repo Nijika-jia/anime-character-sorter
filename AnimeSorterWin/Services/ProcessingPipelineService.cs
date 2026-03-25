@@ -71,7 +71,7 @@ public sealed class ProcessingPipelineService
         var hashBlock = new TransformBlock<string, PipelineItem>(async filePath =>
         {
             stats.IncrementScanned();
-            progress.Report(ToProgressUpdate(stats));
+            progress.Report(ToProgressUpdate(stats, executor));
 
             var md5 = await Md5Hasher.ComputeMd5HexAsync(filePath, ct).ConfigureAwait(false);
 
@@ -82,7 +82,7 @@ public sealed class ProcessingPipelineService
             if (cached is not null && string.Equals(cached.ResultStatus, "Success", StringComparison.OrdinalIgnoreCase))
             {
                 stats.IncrementCacheHit();
-                progress.Report(ToProgressUpdate(stats));
+                progress.Report(ToProgressUpdate(stats, executor));
 
                 return new PipelineItem(
                     SourcePath: filePath,
@@ -117,13 +117,13 @@ public sealed class ProcessingPipelineService
             if (result.Status == "Success")
             {
                 stats.IncrementApiSuccess();
-                progress.Report(ToProgressUpdate(stats));
+                progress.Report(ToProgressUpdate(stats, executor));
             }
             else
             {
                 stats.IncrementApiUnknown();
                 stats.IncrementApiFailures();
-                progress.Report(ToProgressUpdate(stats));
+                progress.Report(ToProgressUpdate(stats, executor));
             }
 
             // 写入缓存：不做任何“相似度阈值”，只要 API 返回有效名称就落库。
@@ -337,7 +337,7 @@ public sealed class ProcessingPipelineService
         var hashBlock = new TransformBlock<string, ScanWorkItem>(async filePath =>
         {
             stats.IncrementScanned();
-            progress.Report(ToProgressUpdate(stats));
+            progress.Report(ToProgressUpdate(stats, executor));
 
             var md5 = await Md5Hasher.ComputeMd5HexAsync(filePath, ct).ConfigureAwait(false);
 
@@ -347,7 +347,7 @@ public sealed class ProcessingPipelineService
             if (cached is not null)
             {
                 stats.IncrementCacheHit();
-                progress.Report(ToProgressUpdate(stats));
+                progress.Report(ToProgressUpdate(stats, executor));
 
                 var pending = CreatePendingFromCached(filePath, md5, cached);
                 return new ScanWorkItem(pending, NeedsApi: false);
@@ -401,7 +401,7 @@ public sealed class ProcessingPipelineService
                 {
                     var cachedPending = CreatePendingFromCached(work.Pending.FilePath, work.Pending.Md5, existing);
                     stats.IncrementCacheHit();
-                    progress.Report(ToProgressUpdate(stats));
+                    progress.Report(ToProgressUpdate(stats, executor));
                     return cachedPending;
                 }
             }
@@ -410,7 +410,7 @@ public sealed class ProcessingPipelineService
             if (throttled429Count > 0)
             {
                 stats.AddThrottled429(throttled429Count);
-                progress.Report(ToProgressUpdate(stats));
+                progress.Report(ToProgressUpdate(stats, executor));
             }
 
             var first = candidatesData.Characters.Count > 0 ? candidatesData.Characters[0] : null;
@@ -441,7 +441,7 @@ public sealed class ProcessingPipelineService
                 stats.IncrementApiFailures();
             }
 
-            progress.Report(ToProgressUpdate(stats));
+            progress.Report(ToProgressUpdate(stats, executor));
 
             // 落地缓存（候选集 + box）
             await using (var db = await _dbContextFactory.CreateDbContextAsync(ct).ConfigureAwait(false))
@@ -676,14 +676,15 @@ public sealed class ProcessingPipelineService
         await source.CopyToAsync(dest, 1024 * 1024, ct).ConfigureAwait(false);
     }
 
-    private static PipelineProgressUpdate ToProgressUpdate(ProcessingStats stats) =>
+    private static PipelineProgressUpdate ToProgressUpdate(ProcessingStats stats, ThrottledHttpExecutor executor) =>
         new(
             Scanned: stats.Scanned,
             CacheHits: stats.CacheHits,
             ApiSuccess: stats.ApiSuccess,
             ApiUnknown: stats.ApiUnknown,
             ApiFailures: stats.ApiFailures,
-            Throttled429: stats.Throttled429);
+            Throttled429: stats.Throttled429,
+            GlobalPauseRemainingMs: executor.GetGlobalPauseRemainingMs());
 
     private sealed record PipelineItem(
         string SourcePath,

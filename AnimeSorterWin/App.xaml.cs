@@ -43,7 +43,8 @@ public partial class App : System.Windows.Application
         // HTTP：IHttpClientFactory 管理连接池。
         services.AddHttpClient("anime_api", client =>
         {
-            client.Timeout = TimeSpan.FromSeconds(60);
+            // 避免单次请求长时间无响应导致“看起来卡住”
+            client.Timeout = TimeSpan.FromSeconds(25);
         });
 
         // API 基础配置（运行时请把 Url 改成你的真实接口）。

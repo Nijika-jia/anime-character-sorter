@@ -86,7 +86,7 @@ public sealed partial class MainViewModel : ObservableObject
     {
         using var dlg = new FolderBrowserDialog
         {
-            Description = "选择输入目录（包含大量动漫图片）",
+            Description = "选择输入目录",
             UseDescriptionForTitle = true
         };
 
@@ -102,7 +102,7 @@ public sealed partial class MainViewModel : ObservableObject
     {
         using var dlg = new FolderBrowserDialog
         {
-            Description = "选择输出目录（将按 Series/Character 归类）",
+            Description = "选择输出目录",
             UseDescriptionForTitle = true
         };
 
@@ -146,7 +146,10 @@ public sealed partial class MainViewModel : ObservableObject
             Throttled429Count = p.Throttled429;
 
             // 让“正在扫描并识别”不再是静态文本，便于你判断是否卡在枚举/MD5/API。
-            StatusText = $"正在扫描并识别... 已扫描 {p.Scanned} 张，429={p.Throttled429}";
+            var waitText = p.GlobalPauseRemainingMs > 0
+                ? $"，等待{p.GlobalPauseRemainingMs / 1000.0:F1}s"
+                : string.Empty;
+            StatusText = $"正在扫描并识别... 已扫描 {p.Scanned} 张，429={p.Throttled429}{waitText}";
         });
 
         try

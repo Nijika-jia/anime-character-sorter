@@ -58,12 +58,12 @@ public sealed class AnimeApiSettings
     /// <summary>
     /// 指数退避最大等待（用户选择的 A 策略：60s）。
     /// </summary>
-    public TimeSpan BackoffMaxDelay { get; set; } = TimeSpan.FromSeconds(60);
+    public TimeSpan BackoffMaxDelay { get; set; } = TimeSpan.FromSeconds(15);
 
     /// <summary>
     /// 429 重试次数（用户选择的 A 策略：最多重试 5 次）。
     /// </summary>
-    public int MaxRetriesOn429 { get; set; } = 5;
+    public int MaxRetriesOn429 { get; set; } = 3;
 
     /// <summary>
     /// 最大并发（由 UI 并发滑块决定），这里给默认值用于初始化。

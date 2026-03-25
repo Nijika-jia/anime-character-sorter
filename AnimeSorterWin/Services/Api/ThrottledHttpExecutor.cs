@@ -57,6 +57,24 @@ public sealed class ThrottledHttpExecutor
     }
 
     /// <summary>
+    /// 获取“全局暂停”的剩余时间（毫秒），用于 UI 显示。
+    /// </summary>
+    public long GetGlobalPauseRemainingMs()
+    {
+        DateTime untilUtc;
+        lock (_pauseLock)
+        {
+            untilUtc = _pauseUntilUtc;
+        }
+
+        var remaining = untilUtc - DateTime.UtcNow;
+        if (remaining <= TimeSpan.Zero)
+            return 0;
+
+        return (long)Math.Ceiling(remaining.TotalMilliseconds);
+    }
+
+    /// <summary>
     /// 在发起实际请求前等待：并发名额、RPS 间隔、以及全局 429 暂停。
     /// </summary>
     public async Task<SemaphoreSlim> WaitForTurnAsync(CancellationToken ct)

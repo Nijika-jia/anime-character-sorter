@@ -216,11 +216,13 @@ public sealed partial class ConfirmWindowViewModel : ObservableObject
         public required CandidateFilterMode FilterMode { get; init; }
         public required List<ConfirmExportItem> Items { get; init; }
         public int Version { get; init; } = 1;
+        public string? SourceRoot { get; init; }
     }
 
     private sealed class ConfirmExportItem
     {
         public required string FilePath { get; init; }
+        public string? RelativePath { get; init; }
         public required string Md5 { get; init; }
 
         public required string DefaultWork { get; init; }
@@ -247,6 +249,7 @@ public sealed partial class ConfirmWindowViewModel : ObservableObject
     public async Task ExportToFileAsync(string filePath, CancellationToken ct)
     {
         var exportItems = new List<ConfirmExportItem>(Items.Count);
+        var sourceRoot = ComputeCommonRoot(Items.Select(i => i.FilePath));
 
         await using var db = await _dbContextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
@@ -274,6 +277,7 @@ public sealed partial class ConfirmWindowViewModel : ObservableObject
             exportItems.Add(new ConfirmExportItem
             {
                 FilePath = item.FilePath,
+                RelativePath = TryBuildRelativePath(sourceRoot, item.FilePath),
                 Md5 = item.Md5,
                 DefaultWork = item.DefaultWork,
                 DefaultCharacter = item.DefaultCharacter,
@@ -293,7 +297,8 @@ public sealed partial class ConfirmWindowViewModel : ObservableObject
         var bundle = new ConfirmExportBundle
         {
             FilterMode = FilterMode,
-            Items = exportItems
+            Items = exportItems,
+            SourceRoot = sourceRoot
         };
 
         var json = JsonSerializer.Serialize(bundle, new JsonSerializerOptions { WriteIndented = true });
@@ -307,6 +312,7 @@ public sealed partial class ConfirmWindowViewModel : ObservableObject
     {
         ct.ThrowIfCancellationRequested();
         var json = await File.ReadAllTextAsync(filePath, ct).ConfigureAwait(false);
+        var importDir = Path.GetDirectoryName(filePath) ?? string.Empty;
 
         var bundle = JsonSerializer.Deserialize<ConfirmExportBundle>(json);
         if (bundle is null || bundle.Items is null)
@@ -322,9 +328,11 @@ public sealed partial class ConfirmWindowViewModel : ObservableObject
         {
             ct.ThrowIfCancellationRequested();
 
+            var resolvedPath = ResolveImportedImagePath(ei, bundle.SourceRoot, importDir);
+
             Items.Add(new PendingImageItem
             {
-                FilePath = ei.FilePath,
+                FilePath = resolvedPath,
                 Md5 = ei.Md5,
                 DefaultWork = ei.DefaultWork,
                 DefaultCharacter = ei.DefaultCharacter,
@@ -353,6 +361,101 @@ public sealed partial class ConfirmWindowViewModel : ObservableObject
         CandidateDropdownOptions = new List<CandidateDropdownOption>();
         SelectedDropdownOption = null;
         _isInitialized = false;
+    }
+
+    private static string ResolveImportedImagePath(ConfirmExportItem item, string? sourceRoot, string importDir)
+    {
+        // 1) 原始绝对路径在本机存在，直接使用。
+        if (!string.IsNullOrWhiteSpace(item.FilePath) && File.Exists(item.FilePath))
+            return item.FilePath;
+
+        // 2) 按“导出时公共根目录 + 相对路径”重建（适合跨机器迁移同一目录结构）。
+        if (!string.IsNullOrWhiteSpace(sourceRoot) && !string.IsNullOrWhiteSpace(item.RelativePath))
+        {
+            var p = Path.GetFullPath(Path.Combine(sourceRoot, item.RelativePath));
+            if (File.Exists(p))
+                return p;
+        }
+
+        // 3) 以导入 JSON 所在目录作为基准，尝试相对路径。
+        if (!string.IsNullOrWhiteSpace(item.RelativePath))
+        {
+            var p = Path.GetFullPath(Path.Combine(importDir, item.RelativePath));
+            if (File.Exists(p))
+                return p;
+        }
+
+        // 4) 再兜底：仅按文件名在 JSON 同目录查找。
+        var fileName = Path.GetFileName(item.FilePath);
+        if (!string.IsNullOrWhiteSpace(fileName))
+        {
+            var p = Path.Combine(importDir, fileName);
+            if (File.Exists(p))
+                return p;
+        }
+
+        // 找不到时保留原路径，列表仍可显示并允许后续手动处理。
+        return item.FilePath;
+    }
+
+    private static string? TryBuildRelativePath(string? sourceRoot, string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(sourceRoot) || string.IsNullOrWhiteSpace(filePath))
+            return null;
+
+        try
+        {
+            return Path.GetRelativePath(sourceRoot, filePath);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static string? ComputeCommonRoot(IEnumerable<string> paths)
+    {
+        var fullPaths = paths
+            .Where(p => !string.IsNullOrWhiteSpace(p))
+            .Select(Path.GetFullPath)
+            .ToArray();
+        if (fullPaths.Length == 0)
+            return null;
+
+        var firstDir = Path.GetDirectoryName(fullPaths[0]);
+        if (string.IsNullOrWhiteSpace(firstDir))
+            return null;
+
+        var root = firstDir;
+        foreach (var p in fullPaths.Skip(1))
+        {
+            var dir = Path.GetDirectoryName(p);
+            if (string.IsNullOrWhiteSpace(dir))
+                return null;
+            root = CommonPathPrefix(root, dir);
+            if (string.IsNullOrWhiteSpace(root))
+                return null;
+        }
+
+        return root;
+    }
+
+    private static string CommonPathPrefix(string a, string b)
+    {
+        var aParts = a.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var bParts = b.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var len = Math.Min(aParts.Length, bParts.Length);
+        var same = 0;
+        for (var i = 0; i < len; i++)
+        {
+            if (!string.Equals(aParts[i], bParts[i], StringComparison.OrdinalIgnoreCase))
+                break;
+            same++;
+        }
+
+        if (same == 0)
+            return string.Empty;
+        return string.Join(Path.DirectorySeparatorChar, aParts.Take(same));
     }
 
     public void FocusedItemChanged(PendingImageItem? item)

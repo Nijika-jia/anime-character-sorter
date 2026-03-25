@@ -6,6 +6,7 @@ public sealed record PipelineProgressUpdate(
     long ApiSuccess,
     long ApiUnknown,
     long ApiFailures,
-    long Throttled429
+    long Throttled429,
+    long GlobalPauseRemainingMs
 );
 
