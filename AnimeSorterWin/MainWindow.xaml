@@ -1,0 +1,128 @@
+<Window x:Class="AnimeSorterWin.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AnimeSorterWin"
+        mc:Ignorable="d"
+        Title="AnimeSorter Win" Height="620" Width="900">
+    <Window.Resources>
+        <local:FileOperationModeToBoolConverter x:Key="FileOperationModeToBoolConverter"/>
+        <local:InverseBoolConverter x:Key="InverseBoolConverter"/>
+        <local:OutputOrganizationModeToBoolConverter x:Key="OutputOrganizationModeToBoolConverter"/>
+    </Window.Resources>
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="140"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="120"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- 输入目录 -->
+        <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="输入目录：" />
+        <TextBox Grid.Row="0" Grid.Column="1" Margin="8,0" Text="{Binding InputRoot, Mode=TwoWay}" />
+        <Button Grid.Row="0" Grid.Column="2" Content="选择..." Command="{Binding BrowseInputCommand}" />
+
+        <!-- 输出目录 -->
+        <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Text="输出目录：" />
+        <TextBox Grid.Row="1" Grid.Column="1" Margin="8,0" Text="{Binding OutputRoot, Mode=TwoWay}" />
+        <Button Grid.Row="1" Grid.Column="2" Content="选择..." Command="{Binding BrowseOutputCommand}" />
+
+        <!-- 并发滑块 -->
+        <GroupBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Header="API 并发（滑块控制 MaxDegreeOfParallelism）" Margin="0,12,0,0">
+            <Grid Margin="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="并发：" VerticalAlignment="Center"/>
+                <Slider Grid.Column="1" Minimum="1" Maximum="10" TickFrequency="1" IsSnapToTickEnabled="True"
+                        Value="{Binding ApiConcurrency, Mode=TwoWay}" Margin="12,0"
+                        VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="2" Text="{Binding ApiConcurrency}" VerticalAlignment="Center"/>
+            </Grid>
+        </GroupBox>
+
+        <!-- 复制/移动 -->
+        <GroupBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Header="文件操作模式" Margin="0,12,0,0">
+            <Grid Margin="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <RadioButton Content="复制（Copy）" IsChecked="{Binding FileOperationMode, Converter={StaticResource FileOperationModeToBoolConverter}, ConverterParameter=Copy}" />
+                <RadioButton Grid.Column="1" Content="移动（Move）" Margin="18,0,0,0"
+                             IsChecked="{Binding FileOperationMode, Converter={StaticResource FileOperationModeToBoolConverter}, ConverterParameter=Move}" />
+            </Grid>
+        </GroupBox>
+
+        <!-- 归类方式（已移到确认窗口控制，这里隐藏） -->
+        <GroupBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Header="归类方式" Margin="0,12,0,0" Visibility="Collapsed">
+            <StackPanel Margin="12">
+                <RadioButton Content="按作品/角色（输出/作品/角色）"
+                             IsChecked="{Binding OutputOrganizationMode, Converter={StaticResource OutputOrganizationModeToBoolConverter}, ConverterParameter=SeriesThenCharacter}" />
+                <RadioButton Content="按作品（输出/作品）"
+                             Margin="0,8,0,0"
+                             IsChecked="{Binding OutputOrganizationMode, Converter={StaticResource OutputOrganizationModeToBoolConverter}, ConverterParameter=SeriesOnly}" />
+                <RadioButton Content="按角色（输出/角色）"
+                             IsChecked="{Binding OutputOrganizationMode, Converter={StaticResource OutputOrganizationModeToBoolConverter}, ConverterParameter=CharacterOnly}" />
+            </StackPanel>
+        </GroupBox>
+
+        <!-- 统计面板 -->
+        <GroupBox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Header="实时统计" Margin="0,12,0,0">
+            <Grid Margin="12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="已扫描：" />
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ScannedCount}" />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="缓存命中：" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CacheHitsCount}" />
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="识别成功：" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ApiSuccessCount}" />
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="识别失败/Unknown：" />
+                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding ApiFailuresCount}" />
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="429 限流次数：" />
+                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Throttled429Count}" />
+
+                <TextBlock Grid.Row="5" Grid.Column="0" Text="状态：" />
+                <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding StatusText}" />
+            </Grid>
+        </GroupBox>
+
+        <!-- 开始/停止 -->
+        <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button Content="开始" Width="140" Margin="0,0,10,0"
+                    Command="{Binding StartCommand}" />
+            <Button Content="导入确认数据" Width="170" Margin="0,0,10,0"
+                    Command="{Binding ImportCommand}" />
+            <Button Content="停止" Width="140" Command="{Binding StopCommand}" />
+        </StackPanel>
+    </Grid>
+</Window>

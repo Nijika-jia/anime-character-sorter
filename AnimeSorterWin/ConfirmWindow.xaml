@@ -1,0 +1,130 @@
+<Window x:Class="AnimeSorterWin.ConfirmWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:AnimeSorterWin"
+        xmlns:conv="clr-namespace:AnimeSorterWin.Converters"
+        xmlns:vm="clr-namespace:AnimeSorterWin.ViewModels"
+        Title="确认窗口" Height="820" Width="1080" WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <local:CandidateFilterModeToBoolConverter x:Key="CandidateFilterModeToBoolConverter"/>
+        <conv:FilePathToFileNameConverter x:Key="FilePathToFileNameConverter"/>
+        <conv:PendingStatusToBrushConverter x:Key="PendingStatusToBrushConverter"/>
+    </Window.Resources>
+
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <!-- 右侧详情保持相对固定宽度，避免窗口拉伸导致右侧被整体放大 -->
+            <ColumnDefinition Width="520"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- 顶部：列表操作提示 -->
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                   Text="提示：默认已将每张图的第一个候选标记为“已确认”。你可以选择条目后：确认/跳过/全部确认，然后点击“开始整理文件”。"
+                   TextWrapping="Wrap" Margin="0,0,0,10"/>
+
+        <!-- 左：主列表 -->
+        <ListView x:Name="ItemsListView"
+                  Grid.Row="1" Grid.Column="0"
+                  ItemsSource="{Binding Items}"
+                  SelectionMode="Extended"
+                  VirtualizingStackPanel.IsVirtualizing="True"
+                  VirtualizingStackPanel.VirtualizationMode="Recycling"
+                  ScrollViewer.CanContentScroll="True"
+                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                  SelectionChanged="ItemsListView_SelectionChanged">
+            <!-- 列显示会根据分类模式在代码里动态重建 -->
+        </ListView>
+
+        <!-- 右：详情区域（外层包一层 ScrollViewer，避免右侧放大把布局撑坏） -->
+        <ScrollViewer Grid.Row="1" Grid.Column="1" Margin="12,0,0,0" VerticalScrollBarVisibility="Auto">
+            <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="420"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <GroupBox Header="分类模式（同时影响候选筛选与输出目录结构）" Margin="0,0,0,10">
+                <StackPanel Margin="12">
+                    <RadioButton Content="按作品"
+                                 GroupName="FilterModeGroup"
+                                 IsChecked="{Binding FilterMode, Converter={StaticResource CandidateFilterModeToBoolConverter}, ConverterParameter=WorkOnly}"/>
+                    <RadioButton Content="按角色"
+                                 GroupName="FilterModeGroup"
+                                 IsChecked="{Binding FilterMode, Converter={StaticResource CandidateFilterModeToBoolConverter}, ConverterParameter=CharacterOnly}"
+                                 Margin="0,8,0,0"/>
+                    <RadioButton Content="按作品-角色"
+                                 GroupName="FilterModeGroup"
+                                 IsChecked="{Binding FilterMode, Converter={StaticResource CandidateFilterModeToBoolConverter}, ConverterParameter=WorkCharacter}"
+                                 Margin="0,8,0,0"/>
+                </StackPanel>
+            </GroupBox>
+
+            <!-- 图片预览 + box -->
+            <Border Grid.Row="1" BorderBrush="#33000000" BorderThickness="1" CornerRadius="4">
+                <Grid>
+                    <Image x:Name="PreviewImage"
+                           Stretch="Uniform"
+                           SizeChanged="PreviewImage_SizeChanged"/>
+                    <Canvas x:Name="OverlayCanvas" IsHitTestVisible="False">
+                        <Rectangle x:Name="BoxRect"
+                                   Stroke="Red" StrokeThickness="3"
+                                   Fill="#2200FF00"/>
+                    </Canvas>
+                </Grid>
+            </Border>
+
+            <!-- 候选选择（下拉 + 手动输入） -->
+            <GroupBox Grid.Row="2" Header="候选选择">
+                <Grid Margin="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="下拉：" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <ComboBox Grid.Row="0" Grid.Column="1"
+                              ItemsSource="{Binding CandidateDropdownOptions}"
+                              SelectedItem="{Binding SelectedDropdownOption, Mode=TwoWay}"
+                              DisplayMemberPath="Display"
+                              MinWidth="220"/>
+
+                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical" Margin="0,10,0,0">
+                        <TextBox Text="{Binding WorkInput, Mode=TwoWay}" Margin="0,0,0,6" />
+                        <TextBox Text="{Binding CharacterInput, Mode=TwoWay}" />
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Grid.Row="3" Header="当前选择的作品/角色（将用于“确认选中项”）">
+                <StackPanel Margin="12">
+                    <TextBlock Text="{Binding FocusedItem.SelectedWork, StringFormat='作品：{0}'}"/>
+                    <TextBlock Text="{Binding FocusedItem.SelectedCharacter, StringFormat='角色：{0}'}"/>
+                    <TextBlock Text="{Binding FocusedItem.Status, StringFormat='状态：{0}'}" Margin="0,6,0,0"/>
+                </StackPanel>
+            </GroupBox>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- 底部按钮 -->
+        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="导出确认数据" Width="160" Margin="0,0,10,0" Click="Export_Click"/>
+            <Button Content="✅确认选中项" Width="160" Margin="0,0,10,0" Click="ConfirmSelected_Click"/>
+            <Button Content="⏭️跳过选中项" Width="150" Margin="0,0,10,0" Click="SkipSelected_Click"/>
+            <Button Content="✅✅全部确认" Width="150" Margin="0,0,10,0" Click="ConfirmAll_Click"/>
+            <Button Content="🗂️开始整理文件" Width="170" Margin="0,0,10,0" Click="StartOrganize_Click"/>
+            <Button Content="❌取消" Width="100" Click="Cancel_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
+
