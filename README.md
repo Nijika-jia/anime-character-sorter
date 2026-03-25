@@ -33,6 +33,7 @@ dotnet publish AnimeSorterWin\AnimeSorterWin.csproj -c Release -r win-x64 --self
 <div style="background-color:#f6f8fa; padding:14px; border-radius:8px; margin-bottom:20px;">
 解决动漫图片堆积、角色与作品信息遗忘、手动整理效率低下等问题。支持批量识别、自动分类、交互式确认，适用于画师、图片收藏爱好者及日常整理使用。
 </div>
+<img width="1641" height="1017" alt="image" src="https://github.com/user-attachments/assets/cb60d728-0065-4451-8699-49bc49ea05b1" />
 
 **核心能力：**
 - 自动识别动漫角色与对应作品
